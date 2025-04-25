@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Semantic Search</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
+    #results p { background: #f9f9f9; padding: 0.5em; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Semantic Search</h1>
+  <input id="queryInput" type="text" placeholder="Enter your query" size="40"/>
+  <button id="searchBtn">Search</button>
+  <div id="results"></div>
+
+  <script>
+    async function performSearch() {
+      const query = document.getElementById('queryInput').value;
+      if (!query) return;
+      const res = await fetch('/search?q=' + encodeURIComponent(query));
+      const results = await res.json();
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = "";
+      if (results.error) {
+        resultsDiv.textContent = "Error: " + results.error;
+        return;
+      }
+      if (results.length === 0) {
+        resultsDiv.textContent = "No results found.";
+        return;
+      }
+      for (const item of results) {
+        const p = document.createElement('p');
+        p.innerHTML = `<strong>${item.title}</strong><br>${item.snippet}`;
+        resultsDiv.appendChild(p);
+      }
+    }
+    document.getElementById('searchBtn').onclick = performSearch;
+  </script>
+</body>
+</html>
