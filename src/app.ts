@@ -43,7 +43,6 @@ class App {
         }
       }, 300));
 
-      // Add Enter key handler
       queryInput.addEventListener('keydown', (e: KeyboardEvent) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -63,12 +62,10 @@ class App {
 
   private setupKeyboardShortcuts() {
     document.addEventListener('keydown', (e: KeyboardEvent) => {
-      // Only handle keyboard shortcuts when not in an input field
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
 
-      // Ctrl/Cmd + K to focus search
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         const { queryInput } = ui.elements;
