@@ -22,12 +22,14 @@
       <div id="suggestionsList" class="suggestions-list" role="listbox" aria-label="Search suggestions"></div>
       <div id="results" class="results-container" role="region" aria-label="Search results"></div>
       <div class="navigation-controls">
-        <button class="pagination-button" id="prevPage" aria-label="Previous page">←</button>
-        <button id="loadMoreBtn" class="load-more-button">Load More</button>
-        <span style="display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end;">
-          <button class="pagination-button" id="nextPage" aria-label="Next page">→</button>
+        <div class="load-more-row">
+          <button id="loadMoreBtn" class="load-more-button">Load More</button>
+        </div>
+        <div class="pagination-row">
+          <button class="pagination-button" id="prevPage" aria-label="Previous page">←</button>
           <span class="pagination-info">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
-        </span>
+          <button class="pagination-button" id="nextPage" aria-label="Next page">→</button>
+        </div>
       </div>
     </div>
   </div>

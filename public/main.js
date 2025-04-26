@@ -140,14 +140,25 @@ class SearchApp {
     this.totalPages = Math.ceil(this.totalResults / this.PAGE_SIZE);
     this.currentPageSpan.textContent = this.currentPage;
     this.totalPagesSpan.textContent = this.totalPages;
+    const paginationRow = document.querySelector('.pagination-row');
+    const loadMoreRow = document.querySelector('.load-more-row');
+    const isDesktop = window.matchMedia('(min-width: 600px)').matches;
     if (this.totalPages > 1) {
       this.prevPageBtn.style.display = '';
       this.nextPageBtn.style.display = '';
       document.querySelector('.pagination-info').style.display = '';
+      paginationRow.classList.remove('hide');
+      if (isDesktop) {
+        loadMoreRow.classList.add('shifted');
+      } else {
+        loadMoreRow.classList.remove('shifted');
+      }
     } else {
       this.prevPageBtn.style.display = 'none';
       this.nextPageBtn.style.display = 'none';
       document.querySelector('.pagination-info').style.display = 'none';
+      paginationRow.classList.add('hide');
+      loadMoreRow.classList.remove('shifted');
     }
     this.prevPageBtn.disabled = this.currentPage === 1;
     this.nextPageBtn.disabled = this.currentPage === this.totalPages;
