@@ -31,7 +31,6 @@
   </div>
 
   <script>
-    // Simple debounce function
     function debounce(func, wait) {
       let timeout;
       return function executedFunction(...args) {
@@ -66,6 +65,7 @@
       let pageCache = {};
       const PAGE_SIZE = 5;
       let hasSearched = false;
+      let lastPage = 1;
 
       // Hide results section initially
       resultsSection.classList.remove('show');
@@ -93,7 +93,7 @@
       function showLoadingSkeletons() {
         const skeletons = Array(PAGE_SIZE).fill(null).map(() => {
           const skeleton = document.createElement('div');
-          skeleton.className = 'result-item';
+          skeleton.className = 'result-item loading-more-skeleton';
           skeleton.innerHTML = `
             <div class="loading-skeleton" style="width: 70%; height: 24px;"></div>
             <div class="loading-skeleton" style="width: 90%;"></div>
@@ -101,12 +101,12 @@
           `;
           return skeleton;
         });
-        resultsDiv.append(...skeletons);
+        skeletons.forEach(skeleton => resultsDiv.appendChild(skeleton));
       }
 
       function removeLoadingSkeletons() {
-        const skeletons = resultsDiv.querySelectorAll('.loading-skeleton');
-        skeletons.forEach(skeleton => skeleton.parentElement.remove());
+        const skeletons = resultsDiv.querySelectorAll('.loading-more-skeleton');
+        skeletons.forEach(skeleton => skeleton.remove());
       }
 
       function showSuggestions(suggestions) {
@@ -178,7 +178,6 @@
           allResults = [];
           pageCache = {};
         }
-        // Animate transition on first search
         if (!hasSearched) {
           initialState.classList.add('hide');
           setTimeout(() => {
@@ -186,9 +185,10 @@
           }, 400);
           hasSearched = true;
         }
+        resultsDiv.innerHTML = '';
+        showLoadingSkeletons();
         searchBtn.disabled = true;
         searchBtn.innerHTML = '<span class="spinner" role="status" aria-label="Loading"></span>Searching...';
-        resultsDiv.classList.add('page-transitioning');
         try {
           let results, total;
           if (pageCache[page]) {
@@ -202,19 +202,16 @@
           totalResults = total;
           allResults = results;
           if (results.length === 0) {
-            // Hide the button if no more results
             loadMoreBtn.classList.remove('visible');
             setTimeout(() => {
               loadMoreBtn.style.display = 'none';
             }, 300);
             return;
           }
+          removeLoadingSkeletons();
           renderResults(results);
           updatePagination();
           updateLoadMoreButton();
-          setTimeout(() => {
-            resultsDiv.classList.remove('page-transitioning');
-          }, 50);
         } catch (error) {
           resultsDiv.innerHTML = `
             <div class="error-message" role="alert">
@@ -235,7 +232,30 @@
         performSearch(currentPage);
       }
 
-      // Event listeners
+      function paginateWithPush(direction, renderFn) {
+        resultsDiv.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
+        void resultsDiv.offsetWidth;
+        if (direction === 'right') {
+          resultsDiv.classList.add('slide-out-left');
+        } else {
+          resultsDiv.classList.add('slide-out-right');
+        }
+        setTimeout(() => {
+          // Replace content and animate in
+          renderFn();
+          resultsDiv.classList.remove('slide-out-left', 'slide-out-right');
+          void resultsDiv.offsetWidth;
+          if (direction === 'right') {
+            resultsDiv.classList.add('slide-in-right');
+          } else {
+            resultsDiv.classList.add('slide-in-left');
+          }
+          setTimeout(() => {
+            resultsDiv.classList.remove('slide-in-right', 'slide-in-left');
+          }, 350);
+        }, 350);
+      }
+
       searchBtn.addEventListener('click', () => performSearch(1));
       queryInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -244,24 +264,46 @@
         }
       });
       loadMoreBtn.addEventListener('click', () => {
+        if (isLoading) return;
         currentPage++;
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.innerHTML = '<span class="spinner" role="status" aria-label="Loading"></span>Loading...';
+        resultsDiv.innerHTML = '';
+        showLoadingSkeletons();
         if (pageCache[currentPage]) {
-          renderResults(pageCache[currentPage].results);
-          updatePagination();
-          updateLoadMoreButton();
+          setTimeout(() => {
+            const skeletons = resultsDiv.querySelectorAll('.loading-more-skeleton');
+            skeletons.forEach(s => s.classList.add('fade-out'));
+            setTimeout(() => {
+              renderResults(pageCache[currentPage].results);
+              updatePagination();
+              updateLoadMoreButton();
+              loadMoreBtn.disabled = false;
+              loadMoreBtn.innerHTML = 'Load More';
+            }, 250);
+          }, 600);
         } else {
-          performSearch(currentPage);
+          performSearch(currentPage).then(() => {
+            const skeletons = resultsDiv.querySelectorAll('.loading-more-skeleton');
+            skeletons.forEach(s => s.classList.add('fade-out'));
+            setTimeout(() => {
+              loadMoreBtn.disabled = false;
+              loadMoreBtn.innerHTML = 'Load More';
+            }, 250);
+          });
         }
       });
       prevPageBtn.addEventListener('click', () => {
         if (currentPage > 1) {
           currentPage--;
           if (pageCache[currentPage]) {
-            renderResults(pageCache[currentPage].results);
-            updatePagination();
-            updateLoadMoreButton();
+            paginateWithPush('left', () => {
+              renderResults(pageCache[currentPage].results);
+              updatePagination();
+              updateLoadMoreButton();
+            });
           } else {
-            performSearch(currentPage);
+            paginateWithPush('left', () => performSearch(currentPage));
           }
         }
       });
@@ -269,16 +311,17 @@
         if (currentPage < totalPages) {
           currentPage++;
           if (pageCache[currentPage]) {
-            renderResults(pageCache[currentPage].results);
-            updatePagination();
-            updateLoadMoreButton();
+            paginateWithPush('right', () => {
+              renderResults(pageCache[currentPage].results);
+              updatePagination();
+              updateLoadMoreButton();
+            });
           } else {
-            performSearch(currentPage);
+            paginateWithPush('right', () => performSearch(currentPage));
           }
         }
       });
 
-      // Suggestions handling
       queryInput.addEventListener('input', debounce(async (e) => {
         const query = e.target.value;
         if (query.length >= 2) {
@@ -294,7 +337,6 @@
         }
       }, 300));
 
-      // Keyboard shortcuts
       document.addEventListener('keydown', (e) => {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
           return;
