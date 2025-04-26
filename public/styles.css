@@ -20,28 +20,29 @@ html, body {
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  min-height: 100vh;
   background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
   color: var(--text-color);
+  font-family: 'Poppins', sans-serif;
   margin: 0;
-  padding: 2rem 1rem 0;
-  min-height: 100vh;
-  overflow-y: hidden;
+  padding: 3rem 1rem 0 1rem;
 }
 
 .container {
+  max-width: 550px;
+  width: 100%;
+  margin: 0 auto;
   background: var(--container-bg);
-  backdrop-filter: blur(6px);
-  padding: 1.5rem;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.2);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  width: 100%;
-  max-width: 550px;
-  margin: 40px auto 0 auto;
-  opacity: 0;
-  transform: translateY(-10px);
-  animation: fadeInCard 0.6s ease-out 0.2s forwards;
+  padding: 2.5rem 1.5rem 2rem 1.5rem;
+  position: relative;
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
 }
 
 @keyframes fadeInCard {
@@ -66,11 +67,13 @@ h1 {
 .search-box {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   border: 1px solid var(--input-border);
   border-radius: 4px;
   overflow: hidden;
   transition: box-shadow 0.2s;
+  background: var(--input-bg);
+  opacity: 1;
 }
 
 .search-box:focus-within {
@@ -82,7 +85,7 @@ h1 {
   min-width: 0;
   height: 3rem;
   padding: 0 1rem;
-  background-color: var(--input-bg);
+  background-color: transparent;
   border: none;
   color: var(--text-color);
   font-size: 1rem;
@@ -131,6 +134,7 @@ h1 {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #3b82f6 #1e293b;
+  margin-bottom: 0;
 }
 
 #results::-webkit-scrollbar {
@@ -151,13 +155,14 @@ h1 {
 
 .result-item {
   background-color: var(--card-bg);
-  padding: 1.5rem;
+  padding: 1rem 1.5rem 1rem 1.5rem;
   border-radius: 6px;
   border-left: 4px solid var(--accent-border);
   box-shadow: 0 2px 12px rgba(0,0,0,0.4);
   opacity: 0;
-  transform: translateY(10px);
-  animation: fadeIn 0.3s forwards;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease-out forwards;
+  margin-bottom: 0.75rem;
 }
 
 .result-item h2 {
@@ -174,7 +179,62 @@ h1 {
   color: rgba(229,231,235,0.7);
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-message, .no-results {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.suggestions-list {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.suggestions-list.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.suggestion-item {
+  opacity: 0;
+  transform: translateX(-10px);
+  animation: fadeInRight 0.3s ease-out forwards;
+  animation-delay: calc(var(--index) * 0.1s);
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 
 .spinner {
   width: 16px;
@@ -188,7 +248,11 @@ h1 {
   margin-right: 8px;
 }
 
-@keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 #loadMoreBtn {
   display: block;
@@ -199,6 +263,264 @@ h1 {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.navigation-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.load-more-button {
+  margin: 0;
+}
+
+.load-more-button:hover {
+  background-color: #60bfff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.load-more-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+  box-shadow: none;
+}
+
+.load-more-button .spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.6);
+  border-top-color: #fff;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.pagination.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pagination-button {
+  padding: 0.5rem 1rem;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  text-align: center;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.pagination-button.active {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.pagination-button .spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.6);
+  border-top-color: #fff;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.pagination-info {
+  color: var(--subtitle-color);
+  font-size: 0.9rem;
+  margin: 0 1rem;
+}
+
+.results-container {
+  position: relative;
+  min-height: 200px;
+}
+
+.results-container.page-transitioning {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.results-container.page-transitioning .result-item {
+  animation: none;
+}
+
+.loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--card-bg) 25%,
+    var(--input-bg) 50%,
+    var(--card-bg) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  height: 20px;
+  margin-bottom: 10px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    align-items: flex-start;
+    padding-top: 1rem;
+  }
+  
+  .container {
+    width: calc(100% - 2rem);
+    padding: 0.75rem 1rem;
+    margin: 24px auto 1rem auto;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .search-box {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+  
+  #queryInput {
+    flex: 1;
+    min-width: 0;
+    height: 2.75rem;
+    padding: 0 1rem;
+    border: none;
+  }
+  
+  #searchBtn {
+    flex: 0 0 auto;
+    min-width: 3.5rem;
+    height: 2.75rem;
+    padding: 0 1.25rem;
+    background-color: var(--accent-color);
+    border: none;
+  }
+  
+  #results {
+    gap: 1rem;
+  }
+  
+  .result-item {
+    padding: 1rem;
+  }
+}
+
+.initial-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  opacity: 1;
+  max-height: 200px;
+  overflow: hidden;
+  transition: opacity 0.5s cubic-bezier(.4,0,.2,1), max-height 0.5s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  z-index: 2;
+}
+.initial-state.hide {
+  opacity: 0;
+  pointer-events: none;
+  max-height: 0;
+}
+
+.results-fade {
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.results-fade.show {
+  opacity: 1;
+}
+
+.results-container {
+  position: relative;
+  min-height: 200px;
+}
+
+.results-container.page-transitioning {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.results-container.page-transitioning .result-item {
+  animation: none;
+}
+
+.loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--card-bg) 25%,
+    var(--input-bg) 50%,
+    var(--card-bg) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  height: 20px;
+  margin-bottom: 10px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @media (max-width: 768px) {
