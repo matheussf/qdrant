@@ -1,7 +1,6 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-// Validate required environment variables
 if (!process.env.QDRANT_URL) {
   throw new Error('QDRANT_URL environment variable is required');
 }

@@ -15,8 +15,9 @@ app.get('/search', async (req, res) => {
     if (!q) {
       return res.status(400).json({ error: 'Missing "q" query parameter' });
     }
+    const offset = parseInt(req.query.offset, 10) || 0;
     const vector = await encodeText(q);
-    const hits = await searchDocuments(vector);
+    const hits = await searchDocuments(vector, offset);
     res.json(hits);
   } catch (err) {
     console.error('Search error:', err);
