@@ -3,19 +3,198 @@
 <head>
   <meta charset="UTF-8" />
   <title>Semantic Search</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
-    #results p { background: #f9f9f9; padding: 0.5em; border-radius: 4px; }
+    /* Make html and body full height so background covers entire viewport */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    :root {
+      --primary-color: #e5e7eb;
+      --accent-color: #3b82f6;
+      --bg-gradient-start: #0a0f23;
+      --bg-gradient-end: #111827;
+      --container-bg: rgba(15,23,42,0.75);
+      --input-bg: rgba(15,23,42,0.6);
+      --card-bg: rgba(15,23,42,0.5);
+      --input-border: rgba(255,255,255,0.15);
+      --accent-border: #3b82f6;
+      --text-color: #e5e7eb;
+      --subtitle-color: rgba(229,231,235,0.7);
+      --placeholder-color: rgba(229,231,235,0.6);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      width: 100%;
+      overflow: auto;
+    }
+
+    .container {
+      background: var(--container-bg);
+      backdrop-filter: blur(6px);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      width: 90%;
+      max-width: 550px;
+      opacity: 0;
+      transform: translateY(-10px);
+      animation: fadeInCard 0.6s ease-out 0.2s forwards;
+    }
+
+    @keyframes fadeInCard {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .subtitle {
+      margin: 0.25rem 0 1rem;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--subtitle-color);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+      text-align: center;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--input-border);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .search-box:focus-within {
+      box-shadow: 0 0 0 2px var(--accent-color);
+    }
+
+    #queryInput {
+      flex: 1;
+      height: 3rem;
+      padding: 0 1rem;
+      background-color: var(--input-bg);
+      border: none;
+      color: var(--text-color);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    #queryInput:focus {
+      border-color: var(--accent-color);
+      background-color: rgba(255,255,255,0.15);
+      box-shadow: 0 0 0 2px rgba(59,130,246,0.4);
+    }
+
+    #queryInput::placeholder {
+      color: var(--placeholder-color);
+    }
+
+    #searchBtn {
+      height: 3rem;
+      padding: 0 1.5rem;
+      background-color: var(--accent-color);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    #searchBtn:hover {
+      background-color: #60bfff;
+      transform: translateY(-2px);
+    }
+
+    #searchBtn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    #results {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .result-item {
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 6px;
+      border-left: 4px solid var(--accent-border);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeIn 0.3s forwards;
+    }
+
+    .result-item h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .result-item p {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: rgba(229,231,235,0.7);
+    }
+
+    /* Spinner animation */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.6);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    /* Results fade-in */
+    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
-  <h1>Semantic Search</h1>
-  <input id="queryInput" type="text" placeholder="Enter your query" size="40"/>
-  <button id="searchBtn">Search</button>
-  <div id="results"></div>
+  <div class="container">
+    <h1>Semantic Search</h1>
+    <p class="subtitle">Find the documents that matter to you</p>
+    <div class="search-box">
+      <input id="queryInput" type="text" placeholder="Enter your search query…" />
+      <button id="searchBtn">Search</button>
+    </div>
+    <div id="results"></div>
+  </div>
 
   <script>
     async function performSearch() {
+      const btn = document.getElementById('searchBtn');
+      const input = document.getElementById('queryInput');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Searching...';
       const query = document.getElementById('queryInput').value;
       if (!query) return;
       const res = await fetch('/search?q=' + encodeURIComponent(query));
@@ -24,19 +203,32 @@
       resultsDiv.innerHTML = "";
       if (results.error) {
         resultsDiv.textContent = "Error: " + results.error;
+        btn.disabled = false;
+        btn.innerHTML = 'Search';
         return;
       }
       if (results.length === 0) {
         resultsDiv.textContent = "No results found.";
+        btn.disabled = false;
+        btn.innerHTML = 'Search';
         return;
       }
       for (const item of results) {
-        const p = document.createElement('p');
-        p.innerHTML = `<strong>${item.title}</strong><br>${item.snippet}`;
-        resultsDiv.appendChild(p);
+        const card = document.createElement('div');
+        card.className = 'result-item';
+        card.innerHTML = `
+          <h2>${item.title}</h2>
+          <p>${item.snippet}</p>
+        `;
+        resultsDiv.appendChild(card);
       }
+      btn.disabled = false;
+      btn.innerHTML = 'Search';
     }
     document.getElementById('searchBtn').onclick = performSearch;
+    document.getElementById('queryInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') performSearch();
+    });
   </script>
 </body>
 </html>
