@@ -9,26 +9,28 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <div id="initialState" class="initial-state">
-      <h1>Semantic Search</h1>
-      <p class="subtitle">Find the documents that matter to you</p>
-    </div>
-    <div class="search-box">
-      <input id="queryInput" type="text" placeholder="Enter your search query…" aria-label="Search query" />
-      <button id="searchBtn">Search</button>
-    </div>
-    <div id="resultsSection" class="results-fade">
-      <div id="suggestionsList" class="suggestions-list" role="listbox" aria-label="Search suggestions"></div>
-      <div id="results" class="results-container" role="region" aria-label="Search results"></div>
-      <div class="navigation-controls">
-        <div class="load-more-row">
-          <button id="loadMoreBtn" class="load-more-button">Load More</button>
-        </div>
-        <div class="pagination-row">
-          <button class="pagination-button" id="prevPage" aria-label="Previous page">←</button>
-          <span class="pagination-info">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
-          <button class="pagination-button" id="nextPage" aria-label="Next page">→</button>
+  <div class="center-wrapper">
+    <div class="container">
+      <div id="initialState" class="initial-state">
+        <h1>Semantic Search</h1>
+        <p class="subtitle">Find the documents that matter to you</p>
+      </div>
+      <div class="search-box">
+        <input id="queryInput" type="text" placeholder="Enter your search query…" aria-label="Search query" />
+        <button id="searchBtn">Search</button>
+      </div>
+      <div id="resultsSection" class="results-fade">
+        <div id="suggestionsList" class="suggestions-list" role="listbox" aria-label="Search suggestions"></div>
+        <div id="results" class="results-container" role="region" aria-label="Search results"></div>
+        <div class="navigation-controls">
+          <div class="load-more-row">
+            <button id="loadMoreBtn" class="load-more-button">Load More</button>
+          </div>
+          <div class="pagination-row">
+            <button class="pagination-button" id="prevPage" aria-label="Previous page">←</button>
+            <span class="pagination-info">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+            <button class="pagination-button" id="nextPage" aria-label="Next page">→</button>
+          </div>
         </div>
       </div>
     </div>
