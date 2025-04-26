@@ -168,6 +168,7 @@ class SearchApp {
       this.pageCache = {};
     }
     if (!this.hasSearched) {
+      document.body.classList.add('search-active');
       this.initialState.classList.add('hide');
       setTimeout(() => {
         this.resultsSection.classList.add('show');
@@ -316,5 +317,6 @@ class SearchApp {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => document.body.classList.add('app-loaded'), 80);
   new SearchApp();
 }); 
